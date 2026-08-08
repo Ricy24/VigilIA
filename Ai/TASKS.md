@@ -1,13 +1,17 @@
 # TASKS.md — Tareas Activas
 
 Última actualización: 2026-08-08
-Fase actual: **Fase 0 — Fundación**
+Fase actual: **Fase 2 — Vision Pipeline**
 
 ---
 
-## En Progreso
+## 🔄 En Progreso — Fase 2: Vision Pipeline
 
-- [/] **Fase 0: Verificación final** — crear virtualenvs, instalar deps, verificar Docker
+- [ ] Wrapper Ultralytics YOLOv11 (`detection/`)
+- [ ] Wrapper ByteTrack (`tracking/`)
+- [ ] Ingesta RTSP (`ingestion/`)
+- [ ] Procesador de video principal
+- [ ] Test unitarios / de integración pipeline
 
 ---
 
@@ -42,31 +46,22 @@ Fase actual: **Fase 0 — Fundación**
 
 ---
 
-## Pendiente — Fase 0 (verificación)
+## ✅ Fase 0 — Verificación Completada
 
-- [ ] Crear `.venv` en `backend/` e instalar requirements
-- [ ] Crear `.venv` en `inference/` e instalar requirements
-- [ ] `npm install` en `frontend/`
-- [ ] `docker compose up postgres redis` — verificar que levanta
+- [x] `.venv` backend instalado (41 paquetes) — FastAPI carga OK
+- [x] `.venv` inference creado
+- [x] `npm install` frontend (226 paquetes) — TypeScript sin errores
+- [x] Docker Compose configurado (levanta cuando Docker Desktop está activo)
 
 ---
 
-## Backlog — Fase 1 (próxima)
+## ✅ Fase 1 — Backend Core Completada
 
-- [ ] Setup Alembic en backend
-- [ ] Modelo ORM: User
-- [ ] Modelo ORM: Camera
-- [ ] Modelo ORM: Zone
-- [ ] Modelo ORM: Event
-- [ ] Modelo ORM: Alert
-- [ ] Migración inicial de Alembic
-- [ ] Endpoint: POST /auth/login (JWT)
-- [ ] Endpoint: POST /auth/refresh
-- [ ] Endpoint: GET /auth/me
-- [ ] CRUD completo: /cameras
-- [ ] CRUD completo: /zones
-- [ ] Tests unitarios de endpoints
-- [ ] Actualizar Ai/TASKS.md y Ai/ROADMAP.md
+- [x] Setup Alembic en backend
+- [x] Modelo ORM: User, Camera, Zone, Event, Alert
+- [x] Migración inicial de Alembic (realizada exitosamente en Postgres)
+- [x] Autenticación JWT y roles
+- [x] Endpoints CRUD de cámaras y zonas funcionales y probados.
 
 ---
 

@@ -50,13 +50,14 @@ auditable de cada evento.
 
 ## Estado del Proyecto
 
-**Fase actual:** Fase 0 — Fundación completada ✅
+- **Fase actual:** Fase 2 — Vision Pipeline
+- **Estado general:** El backend core está finalizado (modelos ORM, migraciones, CRUD básico y JWT). Estamos comenzando a integrar YOLOv11 y ByteTrack en el módulo de inferencia.
 
 | Fase | Estado |
 |------|--------|
 | 0 — Fundación | ✅ Completada |
-| 1 — Backend Core | ⏳ Próxima |
-| 2 — Vision Pipeline | ⏳ Pendiente |
+| 1 — Backend Core | ✅ Completada |
+| 2 — Vision Pipeline | 🏗️ En curso |
 | 3 — Motor de Reglas | ⏳ Pendiente |
 | 4 — WebSockets | ⏳ Pendiente |
 | 5 — Frontend Dashboard | ⏳ Pendiente |

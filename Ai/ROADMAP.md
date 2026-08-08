@@ -1,7 +1,7 @@
 # ROADMAP.md — Hoja de Ruta de VigilIA
 
 Última actualización: 2026-08-08
-Estado actual: **Fase 0 — En ejecución**
+Estado actual: **Fase 2 — En ejecución**
 
 ---
 
@@ -9,9 +9,9 @@ Estado actual: **Fase 0 — En ejecución**
 
 | Fase | Nombre | Estado | Descripción |
 |------|--------|--------|-------------|
-| 0 | Fundación | 🔄 En progreso | Estructura, entornos, Docker Compose, Ai/ docs |
-| 1 | Backend Core | ⏳ Pendiente | Auth JWT, CRUD cameras/zones/users, DB migrations |
-| 2 | Vision Pipeline | ⏳ Pendiente | RTSP ingesta, detección YOLO, tracking ByteTrack |
+| 0 | Fundación | ✅ Completada | Estructura, entornos, Docker Compose, Ai/ docs |
+| 1 | Backend Core | ✅ Completada | Auth JWT, CRUD cameras/zones/users, DB migrations |
+| 2 | Vision Pipeline | 🔄 En progreso | RTSP ingesta, detección YOLO, tracking ByteTrack |
 | 3 | Motor de Reglas SST | ⏳ Pendiente | EPP, zonas de exclusión, detección de caídas |
 | 4 | Alertas WebSocket | ⏳ Pendiente | Push de alertas en tiempo real, notificaciones |
 | 5 | Frontend Dashboard | ⏳ Pendiente | React, visualización cámaras, alertas, historial |
@@ -48,9 +48,10 @@ Estado actual: **Fase 0 — En ejecución**
 - [x] `docker/.env.example` — Template de variables de entorno
 - [x] `Ai/` — Todos los archivos de documentación del agente actualizados
 - [ ] Crear virtualenv backend e instalar dependencias
-- [ ] Crear virtualenv inference e instalar dependencias
-- [ ] `npm install` frontend
-- [ ] Verificación: `docker compose up postgres redis` arranca sin errores
+- [x] Crear virtualenv backend e instalar dependencias
+- [x] Crear virtualenv inference e instalar dependencias
+- [x] `npm install` frontend
+- [x] Verificación: `docker compose up postgres redis` arranca sin errores
 
 ---
 
