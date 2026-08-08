@@ -1,0 +1,153 @@
+# ============================================================
+# VigilIA — Docker Compose de DESARROLLO
+#
+# Uso:
+#   docker compose -f docker/docker-compose.dev.yml up
+#   docker compose -f docker/docker-compose.dev.yml up postgres redis
+#   docker compose -f docker/docker-compose.dev.yml down -v
+#
+# Los servicios backend, inference y frontend montan el código
+# fuente como volumen para hot-reload sin reconstruir la imagen.
+# ============================================================
+
+name: vigilia-dev
+
+services:
+
+  # ──────────────────────────────────────────────────────────
+  # PostgreSQL 16
+  # ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: vigilia_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vigilia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vigilia_dev_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-vigilia}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d   # scripts SQL opcionales
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vigilia} -d ${POSTGRES_DB:-vigilia}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ──────────────────────────────────────────────────────────
+  # Redis 7
+  # ──────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: vigilia_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ──────────────────────────────────────────────────────────
+  # Backend (FastAPI)
+  # ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: vigilia_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_SERVER: postgres
+      REDIS_HOST: redis
+      ENVIRONMENT: development
+      DEBUG: "true"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../backend:/app          # hot-reload: código fuente montado
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ──────────────────────────────────────────────────────────
+  # Inference Pipeline
+  # ──────────────────────────────────────────────────────────
+  inference:
+    build:
+      context: ../inference
+      dockerfile: Dockerfile
+      target: development
+    container_name: vigilia_inference
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      BACKEND_URL: http://backend:8000
+      REDIS_HOST: redis
+      ENVIRONMENT: development
+      DEVICE: cpu            # Cambiar a "cuda" si hay GPU disponible
+    volumes:
+      - ../inference:/app    # hot-reload
+      - ../models:/models    # modelos YOLO compartidos
+    depends_on:
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - inference            # Solo levanta con: --profile inference
+
+  # ──────────────────────────────────────────────────────────
+  # Frontend (Vite dev server)
+  # ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: vigilia_frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      VITE_API_URL: http://localhost:8000
+      VITE_WS_URL: ws://localhost:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules      # evita sobreescribir node_modules del contenedor
+    depends_on:
+      - backend
+    profiles:
+      - frontend               # Solo levanta con: --profile frontend
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
