@@ -1,104 +1,142 @@
 # VigilIA
 
-**Plataforma Inteligente de Visión Artificial para Seguridad y Salud en el Trabajo (SST)**
+**Visión artificial en tiempo real para Seguridad y Salud en el Trabajo.**
 
-[![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow)](.)
-[![Fase](https://img.shields.io/badge/fase-0%20fundaci%C3%B3n-blue)](Ai/ROADMAP.md)
-[![Python](https://img.shields.io/badge/python-3.12-blue)](backend/requirements.txt)
-[![React](https://img.shields.io/badge/react-18-61dafb)](frontend/package.json)
+![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![YOLO](https://img.shields.io/badge/Ultralytics-YOLO11-111F68)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 
-VigilIA convierte cámaras de videovigilancia convencionales en sensores inteligentes de SST,
-detectando en tiempo real: ausencia de EPP, invasión de zonas de exclusión, caídas y comportamientos
-anómalos. Genera alertas accionables y registros trazables para la gestión de seguridad industrial.
+VigilIA convierte cámaras de videovigilancia convencionales en **sensores inteligentes de seguridad industrial**: detecta ausencia de EPP, invasión de zonas de exclusión, caídas y comportamientos anómalos, y emite alertas accionables con registro trazable.
 
----
-
-## 🏗️ Estado del Proyecto
-
-| Fase | Nombre | Estado |
-|------|--------|--------|
-| 0 | Fundación (estructura, entornos, Docker) | ✅ Completada |
-| 1 | Backend Core (Auth, CRUD, DB) | ⏳ Próxima |
-| 2 | Vision Pipeline (YOLO + ByteTrack) | ⏳ Pendiente |
-| 3 | Motor de Reglas SST | ⏳ Pendiente |
-| 4 | Alertas WebSocket | ⏳ Pendiente |
-| 5 | Frontend Dashboard | ⏳ Pendiente |
-| 6 | LLM Reports | ⏳ Pendiente |
-| 7 | Hardening | ⏳ Pendiente |
+No es un detector suelto. Es una plataforma completa: pipeline de visión, motor de reglas de negocio, API, alertas en vivo y trazabilidad de eventos.
 
 ---
 
-## 🚀 Inicio Rápido
+## El problema
 
-### Prerrequisitos
-- Docker Desktop
-- Python 3.12
-- Node.js 22+
+Una cámara de seguridad graba, pero no avisa. El cumplimiento de SST termina dependiendo de que alguien esté mirando el monitor en el momento exacto, y de un informe en Excel que se arma después.
 
-### Levantar infraestructura de desarrollo
-
-```bash
-# 1. Copiar variables de entorno
-cp docker/.env.example docker/.env
-
-# 2. Levantar PostgreSQL + Redis + Backend
-docker compose -f docker/docker-compose.dev.yml up postgres redis backend
-
-# 3. Frontend (en otra terminal)
-cd frontend && npm install && npm run dev
-```
-
-Abrir: http://localhost:5173 | API Docs: http://localhost:8000/docs
+VigilIA cierra ese hueco: el video se convierte en eventos con contexto (quién, dónde, qué regla se rompió, cuándo) y esos eventos llegan como alerta.
 
 ---
 
-## 📁 Estructura del Proyecto
+## Arquitectura
 
-```
-VigilIA/
-├── Ai/           ← Documentación del agente de IA (leer primero)
-├── backend/      ← FastAPI + PostgreSQL + Redis
-├── inference/    ← Vision Pipeline (YOLO + ByteTrack + Reglas SST)
-├── frontend/     ← React + Vite + TypeScript
-├── docker/       ← Docker Compose + variables de entorno
-├── models/       ← Modelos YOLO (.pt) — ignorados por Git
-├── datasets/     ← Datasets de entrenamiento — ignorados por Git
-└── docs/         ← Documentación (SAD v1.0)
-```
+    Cámara IP / RTSP
+          │
+          ▼
+    Inference (YOLO11 + ByteTrack)  ──►  Motor de reglas SST
+          │                                     │
+          ▼                                     ▼
+       Eventos  ────────────────►  API FastAPI (v1)  ──►  PostgreSQL
+                                        │
+                                        ▼
+                                  WebSocket  ──►  Dashboard React
 
 ---
 
-## 📚 Documentación
+## Estado del proyecto
 
-| Documento | Descripción |
-|-----------|-------------|
-| [Ai/AI_AGENT.md](Ai/AI_AGENT.md) | Guía de operación para agentes de IA |
-| [Ai/ROADMAP.md](Ai/ROADMAP.md) | Hoja de ruta detallada |
+| Fase | Alcance | Estado |
+|------|---------|--------|
+| 0 | Fundación: estructura, entornos, Docker | Completada |
+| 1 | Backend core: auth, cámaras, zonas, eventos, alertas | En progreso |
+| 2 | Pipeline de visión: YOLO + tracking | Prototipo funcional |
+| 3 | Motor de reglas SST | Pendiente |
+| 4 | Alertas en tiempo real (WebSocket) | Base lista |
+| 5 | Dashboard React | Pendiente |
+| 6 | Reportes asistidos por LLM | Pendiente |
+| 7 | Hardening y despliegue | Pendiente |
+
+### Qué funciona hoy
+
+- **API REST v1** con endpoints de autenticación, cámaras, zonas, eventos, alertas y health check.
+- **WebSocket** para empujar alertas al cliente.
+- **Inferencia con YOLO11** (segmentación y pose estimation) corriendo sobre video real, con overlay de HUD.
+- **Docker Compose** con PostgreSQL, Redis, backend e inference.
+
+---
+
+## Stack
+
+- **Visión:** Python, OpenCV, Ultralytics YOLO11, ByteTrack, MediaPipe
+- **Backend:** FastAPI, SQLAlchemy, PostgreSQL, Redis, Alembic
+- **Frontend:** React 18, Vite, TypeScript
+- **Infraestructura:** Docker, Docker Compose
+
+---
+
+## Inicio rápido
+
+    # 1. Variables de entorno
+    cp docker/.env.example docker/.env
+
+    # 2. Infraestructura + backend
+    docker compose -f docker/docker-compose.dev.yml up postgres redis backend
+
+    # 3. Frontend
+    cd frontend && npm install && npm run dev
+
+Dashboard: http://localhost:5173 · API docs: http://localhost:8000/docs
+
+---
+
+## Estructura
+
+    VigilIA/
+    ├── Ai/           Documentación técnica y de operación (leer primero)
+    ├── backend/      FastAPI + PostgreSQL + Redis + Alembic
+    ├── inference/    Pipeline de visión (YOLO11, tracking, reglas)
+    ├── frontend/     React + Vite + TypeScript
+    ├── docker/       Compose y variables de entorno
+    ├── models/       Pesos YOLO (fuera de Git)
+    ├── datasets/     Datasets de entrenamiento (fuera de Git)
+    └── docs/         Documento de arquitectura (SAD v1.0)
+
+---
+
+## Documentación
+
+| Documento | Contenido |
+|-----------|-----------|
 | [Ai/ARCHITECTURE.md](Ai/ARCHITECTURE.md) | Arquitectura del sistema |
-| [Ai/TECH_STACK.md](Ai/TECH_STACK.md) | Stack tecnológico con versiones |
+| [Ai/ROADMAP.md](Ai/ROADMAP.md) | Hoja de ruta por fases |
+| [Ai/TECH_STACK.md](Ai/TECH_STACK.md) | Stack con versiones |
 | [Ai/DECISIONS.md](Ai/DECISIONS.md) | Registro de decisiones técnicas |
-| [Ai/DEPLOYMENT.md](Ai/DEPLOYMENT.md) | Guía de despliegue |
-| [docs/VigilIA_SAD_v1.0.docx](docs/VigilIA_SAD_v1.0.docx) | SAD completo (referencia arquitectónica) |
+| [Ai/SECURITY.md](Ai/SECURITY.md) | Principios de seguridad |
+| [docs/VigilIA_SAD_v1.0.docx](docs/VigilIA_SAD_v1.0.docx) | SAD completo |
 
 ---
 
-## 🛠️ Stack Tecnológico
+## De CCTV a plataformas aéreas
 
-- **Vision Pipeline:** Python + OpenCV + Ultralytics YOLO11 + ByteTrack + MediaPipe
-- **Backend:** FastAPI + SQLAlchemy + PostgreSQL + Redis
-- **Frontend:** React 18 + Vite + TypeScript
-- **Infraestructura:** Docker + Docker Compose
+El pipeline está diseñado para ser **independiente de la fuente de video**: consume un stream y devuelve detecciones con identidad persistente. Eso lo hace reutilizable en escenarios distintos al CCTV fijo.
 
----
+Llevarlo a **video aéreo (drones)** requiere trabajo adicional y conocido:
 
-## ⚠️ Principio de Seguridad Fundamental
+- estabilización y compensación de movimiento de cámara,
+- modelos entrenados con perspectiva aérea,
+- georreferenciación de detecciones sobre el frame,
+- cómputo en el borde (Jetson o similar).
 
-El sistema de IA **detecta y alerta**. **Nunca automatiza consecuencias** sobre personas.
-El LLM **nunca decide** si algo es un evento de seguridad — solo genera narrativa de reportes.
-Ver [Ai/SECURITY.md](Ai/SECURITY.md) y [Ai/DECISIONS.md](Ai/DECISIONS.md).
+Es una línea de trabajo del proyecto, no una capacidad ya integrada.
 
 ---
 
-## 👤 Autor
+## Principio de seguridad
 
-Andrés Durán — Proyecto VigilIA, 2026
+El sistema **detecta y alerta**. Nunca automatiza consecuencias sobre personas.
+
+El LLM nunca decide si un evento es de seguridad: solo redacta narrativa de reportes. Ver [Ai/SECURITY.md](Ai/SECURITY.md).
+
+---
+
+## Autor
+
+**Andrés Ricardo Durán Corredor** — Bogotá, Colombia
+[GitHub](https://github.com/Ricy24) · [LinkedIn](https://www.linkedin.com/in/andres-duran-287462349/) · anriduco2019@gmail.com
+
+Proyecto VigilIA, 2026.
